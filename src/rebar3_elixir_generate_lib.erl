@@ -32,8 +32,8 @@ do(State) ->
          end,
   [begin
      Output = rebar_app_info:out_dir(App),
-
-     rebar_api:info("Load modules from ~s", [Output])
+     Source = rebar_app_info:source(App),
+     rebar_api:info("Load modules from ~s (~s)", [Output, Source])
    end || App <- Apps],
   {ok, State}.
 
