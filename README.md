@@ -7,6 +7,26 @@ This plugin has two commands :
 * `rebar3 elixir generate_mix` will generate the Mix file.
 * `rebar3 elixir generate_lib` will generate Elixir bindings.
 
+## Usage
+
+__rebar3_elixir__ is available has a [hex](https://hex.pm/packages/rebar3_elixir) or [git](https://github.com/botsunit/rebar3_elixir) dependency :
+
+Juste add :
+
+```
+{plugins, [rebar3_elixir]}.
+```
+
+or 
+
+```
+{plugins, [
+  {rebar3_elixir, {git, "https://github.com/botsunit/rebar3_elixir.git"}}
+]}.
+```
+
+in your `rebar.config`.
+
 ## Example
 
 ```rebar.config
