@@ -23,7 +23,6 @@ init(State) ->
 
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
-  rebar_api:info("Generate Elixir bindings", []),
   Apps = case rebar_state:current_app(State) of
            undefined ->
              rebar_state:project_apps(State);
@@ -44,6 +43,7 @@ format_error(Reason) ->
 
 generate_binding(Mod, Ebin, LibDir) ->
   LibFile = filename:join(LibDir, atom_to_list(Mod) ++ ".ex"),
+  rebar_api:info("Generate ~s", [LibFile]),
   Module = filename:join(Ebin, atom_to_list(Mod)),
   case code:load_abs(Module) of
     {error, Reason0} -> 
@@ -77,7 +77,7 @@ generate_binding(Mod, Ebin, LibDir) ->
                   rebar_api:error("Can't create file ~s: ~p", [LibFile, Reason1])
               end;
             {error, Reason2} ->
-              rebar_api:error("Can't create directory for ~s: ~p", [LibFile, Reason2])
+              rebar_api:error("Can't create ~s: ~p", [LibDir, Reason2])
           end;
         _-> 
           rebar_api:error("Can't retrieve module info for ~s", [Mod])
