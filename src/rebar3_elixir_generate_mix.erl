@@ -97,7 +97,7 @@ do(State) ->
               end,
      rebar_api:info("Create ~s", [MixFile]),
      file:write_file(MixFile,
-                     ?FMT(?MIX_EXS, [modularize(AppName),
+                     ?FMT(?MIX_EXS, [rebar3_elixir_utils:modularize(AppName),
                                      AppName,
                                      AppVsn,
                                      to_ex(AppApplications),
@@ -180,24 +180,6 @@ deps_test() ->
                {seven, "7.*", {git, "http://seven.git"}},
                {eight, "8.*", {git, "http://eight.git", {tag, "8.0.0"}}}
               ], test)).
--endif.
-
-modularize(Name) when is_atom(Name) ->
-  modularize(atom_to_list(Name));
-modularize(Name) when is_binary(Name) ->
-  modularize(binary_to_list(Name));
-modularize(Name) when is_list(Name) ->
-	string:join(lists:map(fun([H|R]) -> [string:to_upper(H)|string:to_lower(R)] end, string:tokens(Name, "/_")), ".").
-
--ifdef(TEST).
-modularize_test() ->
-  ?assertEqual("One", modularize("one")),
-  ?assertEqual("One", modularize(one)),
-  ?assertEqual("One.Two", modularize(one_two)),
-  ?assertEqual("One.Two", modularize('One_two')),
-  ?assertEqual("One.Two", modularize('One_Two')),
-  ?assertEqual("One.Two", modularize(one_Two)),
-  ?assertEqual("One.Two.Three", modularize(one_two_three)).
 -endif.
 
 to_ex([]) ->
