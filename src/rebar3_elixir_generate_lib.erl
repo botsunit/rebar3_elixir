@@ -67,9 +67,9 @@ generate_binding(Mod, Ebin, LibDir) ->
                                              lists:map(fun(E) ->
                                                            "arg" ++ integer_to_list(E)
                                                        end, lists:seq(1,A)), ", "),
-                                    io:format(IO, "	 def unquote(:~p)(~s) do\n", [atom_to_list(N), Args]),
-                                    io:format(IO, "		 :erlang.apply(:~p, :~p, [~s])\n", [atom_to_list(M), atom_to_list(N), Args]),
-                                    io:format(IO, "	 end\n", [])
+                                    io:format(IO, "  def unquote(:~p)(~s) do\n", [atom_to_list(N), Args]),
+                                    io:format(IO, "    :erlang.apply(:~p, :~p, [~s])\n", [atom_to_list(M), atom_to_list(N), Args]),
+                                    io:format(IO, "  end\n", [])
                                 end, MI),
                   io:format(IO, "end\n", []),
                   ok = file:close(IO);
