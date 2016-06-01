@@ -42,7 +42,7 @@ format_error(Reason) ->
   io_lib:format("~p", [Reason]).
 
 generate_binding(Mod, Ebin, LibDir) ->
-  LibFile = filename:join(LibDir, atom_to_list(Mod) ++ ".ex"),
+  LibFile = filename:join(LibDir, rebar3_elixir_utils:modularize(Mod) ++ ".ex"),
   rebar_api:info("Generate ~s", [LibFile]),
   Module = filename:join(Ebin, atom_to_list(Mod)),
   case code:load_abs(Module) of
