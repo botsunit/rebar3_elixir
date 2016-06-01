@@ -24,6 +24,17 @@ init(State) ->
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
   rebar_api:info("Generate Elixir bindings", []),
+  Apps = case rebar_state:current_app(State) of
+           undefined ->
+             rebar_state:project_apps(State);
+           AppInfo ->
+             [AppInfo]
+         end,
+  [begin
+     Output = rebar_app_info:out_dir(App),
+
+     rebar_api:info("Load modules from ~s", [Output])
+   end || App <- Apps],
   {ok, State}.
 
 -spec format_error(any()) -> iolist().
