@@ -1,5 +1,5 @@
 {application, rebar3_elixir,
- [{description, "A rebar plugin to generate mix.exs"}
+ [{description, "A rebar plugin to generate mix.exs and Elixir bindings"}
   ,{vsn, "0.0.2"}
   ,{registered, []}
   ,{applications, [kernel, stdlib]}
