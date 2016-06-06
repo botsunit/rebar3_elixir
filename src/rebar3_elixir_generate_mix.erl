@@ -122,10 +122,10 @@ get_deps([Name|Deps], Acc, Only) when is_atom(Name) ->
   get_deps(Deps, [?FMT("~n      {:~s, \"> 0\"~s}", [Name, Only])|Acc], Only);
 get_deps([{Name, Version}|Deps], Acc, Only) when is_atom(Name), is_list(Version) ->
   get_deps(Deps, [?FMT("~n      {:~s, \"~s\"~s}", [Name, Version, Only])|Acc], Only);
-get_deps([{_, {pkg, Name}}|Deps], Acc, Only) when is_atom(Name) ->
-  get_deps(Deps, [?FMT("~n      {:~s, \"> 0\"~s}", [Name, Only])|Acc], Only);
-get_deps([{_, Version, {pkg, Name}}|Deps], Acc, Only) when is_atom(Name), is_list(Version) ->
-  get_deps(Deps, [?FMT("~n      {:~s, \"~s\"~s}", [Name, Version, Only])|Acc], Only);
+get_deps([{Name, {pkg, HexName}}|Deps], Acc, Only) when is_atom(Name) ->
+  get_deps(Deps, [?FMT("~n      {:~s, \"> 0\"~s, hex: :~s}", [Name, Only, HexName])|Acc], Only);
+get_deps([{Name, Version, {pkg, HexName}}|Deps], Acc, Only) when is_atom(Name), is_list(Version) ->
+  get_deps(Deps, [?FMT("~n      {:~s, \"~s\"~s, hex: :~s}", [Name, Version, Only, HexName])|Acc], Only);
 get_deps([{Name, {git, URL}}|Deps], Acc, Only) when is_atom(Name), is_list(URL) ->
   get_deps(Deps, [?FMT("~n      {:~s, git: \"~s\"~s}", [Name, URL, Only])|Acc], Only);
 get_deps([{Name, {git, URL, {Type, RTB}}}|Deps], Acc, Only) when is_atom(Name), is_list(URL), is_atom(Type), is_list(RTB) ->
@@ -142,8 +142,8 @@ deps_test() ->
      [
       "\n      {:one, \"> 0\"}",
       "\n      {:two, \"~> 2.0.0\"}",
-      "\n      {:real_three, \"> 0\"}",
-      "\n      {:real_four, \"~> 4.0.0\"}",
+      "\n      {:three, \"> 0\", hex: :real_three}",
+      "\n      {:four, \"~> 4.0.0\", hex: :real_four}",
       "\n      {:five, git: \"http://five.git\"}",
       "\n      {:six, git: \"http://six.git\", branche: \"master\"}",
       "\n      {:seven, ~r/7.*/, git: \"http://seven.git\"}",
@@ -163,8 +163,8 @@ deps_test() ->
      [
       "\n      {:one, \"> 0\", only: :test}",
       "\n      {:two, \"~> 2.0.0\", only: :test}",
-      "\n      {:real_three, \"> 0\", only: :test}",
-      "\n      {:real_four, \"~> 4.0.0\", only: :test}",
+      "\n      {:three, \"> 0\", only: :test, hex: :real_three}",
+      "\n      {:four, \"~> 4.0.0\", only: :test, hex: :real_four}",
       "\n      {:five, git: \"http://five.git\", only: :test}",
       "\n      {:six, git: \"http://six.git\", branche: \"master\", only: :test}",
       "\n      {:seven, ~r/7.*/, git: \"http://seven.git\", only: :test}",
