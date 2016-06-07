@@ -63,7 +63,7 @@ do(State) ->
   [begin
      AppName = rebar_app_info:name(App),
      AppVsn = rebar_app_info:original_vsn(App),
-     AppApplications = rebar_app_info:applications(App),
+     AppApplications = rebar_app_info:applications(App) -- [kernel, stdlib],
      AppDetails = rebar_app_info:app_details(App),
      AppDeps = rebar_state:get(State, deps, []),
      AppProfiles = rebar_state:get(State, profiles, []),
