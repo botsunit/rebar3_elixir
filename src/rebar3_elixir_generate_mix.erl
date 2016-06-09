@@ -12,33 +12,7 @@
 -define(PROVIDER, generate_mix).
 -define(DEPS, [{default, compile}]).
 
--define(FMT(F, V), lists:flatten(io_lib:format(F, V))).
--define(MIX_EXS, "defmodule ~s.Mixfile do
-  use Mix.Project
-
-  def project do
-    [
-      app: :~s,
-      version: \"~s\",
-      elixir: \"~~> 1.2\",
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
-      deps: deps
-    ]
-  end
-
-  def application do
-    [
-       applications: ~s,
-       env: ~s~s
-    ]
-  end
-
-  defp deps do
-    [~s    
-    ]
-  end
-end").
+-include("../include/rebar3_elixir.hrl").
 
 -spec init(rebar_state:t()) -> {ok, rebar_state:t()}.
 init(State) ->
@@ -60,6 +34,7 @@ do(State) ->
            AppInfo ->
              [AppInfo]
          end,
+  ElixirVersion = rebar_state:get(State, elixir_version, ?DEFAULT_ELIXIR_VERSION),
   [begin
      AppName = rebar_app_info:name(App),
      AppVsn = rebar_app_info:original_vsn(App),
@@ -100,6 +75,7 @@ do(State) ->
                      ?FMT(?MIX_EXS, [rebar3_elixir_utils:modularize(AppName),
                                      AppName,
                                      AppVsn,
+                                     ElixirVersion,
                                      to_ex(AppApplications),
                                      to_ex(AppEnv),
                                      AppMod,

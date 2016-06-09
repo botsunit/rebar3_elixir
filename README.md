@@ -29,7 +29,38 @@ in your `rebar.config`.
 
 ## Example
 
-```rebar.config
+```erlang
+% rebar.config
+{erl_opts, [debug_info, warn_export_vars, warn_shadow_vars, warn_obsolete_guard]}.
+
+{plugins, [rebar3_elixir]}.
+{elixir_version, "~> 1.2"}.
+
+{deps, [
+  {lager, "~> 3.2"},
+  {erlydtl, ".*", {git, "https://github.com/erlydtl/erlydtl.git", {branch, "master"}}}
+]}.
+```
+
+```erlang
+% test.app
+{application, test,
+ [
+  {description, ""},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {modules, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  syntax_tools,
+                  compiler,
+                  goldrush,
+                  lager
+                 ]},
+  {mod, {test_app, []}},
+  {env, []}
+ ]}.
 ```
 
 `rebar3 elixir generate_mix` will generate :
@@ -39,21 +70,27 @@ defmodule Test.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :test,
-     version: "0.0.1",
-     elixir: "~> 1.2",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps]
+    [
+      app: :test,
+      version: "0.0.1",
+      elixir: "~> 1.2",
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      deps: deps
+    ]
   end
 
   def application do
-    [applications: [:lager], mod: {:test_app, []}]
+    [
+       applications: [:syntax_tools, :compiler, :goldrush, :lager], 
+       env: [],
+       mod: {:test_app, []}]
+    ]
   end
 
   defp deps do
     [ 
-      {:lager, ~r/.*/, git: "https://github.com/basho/lager.git", branch: "master"},
+      {:lager, "~> 3.2"},
       {:erlydtl, ~r/.*/, git: "https://github.com/erlydtl/erlydtl.git", branch: "master"},  
     ]
   end
