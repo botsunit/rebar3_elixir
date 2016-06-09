@@ -68,10 +68,10 @@ generate_binding(ModuleName, Ebin, LibDir, ElixirVersion) ->
   io:format(IO, "# Using rebar3_elixir (https://github.com/botsunit/rebar3_elixir)\n", []),
   io:format(IO, "# MODIFY IT AT YOUR OWN RISK AND ONLY IF YOU KNOW WHAT YOU ARE DOING!\n", []),
   io:format(IO, "defmodule ~s do\n", [rebar3_elixir_utils:modularize(ModuleName)]),
-  _ = write_callbacks(IO, Module, callbacks),
+  _ = write_callbacks(IO, Module),
   case version(ElixirVersion) >= "1.3.0" of
     true ->
-      _ = write_callbacks(IO, Module, optional_callbacks);
+      _ = write_optional_callbacks(IO, Module);
     false ->
       ok
   end,
@@ -79,12 +79,25 @@ generate_binding(ModuleName, Ebin, LibDir, ElixirVersion) ->
   io:format(IO, "end\n", []),
   file:close(IO).
 
-write_callbacks(IO, Module, Type) ->
+write_callbacks(IO, Module) ->
   case erlang:function_exported(Module, behaviour_info, 1) of
     true ->
       lists:foreach(fun({CallbackName, CallbackArity}) ->
-                        io:format(IO, "  @~s ~s(~s) :: any\n", [Type, CallbackName, any(CallbackArity)])
-                    end, erlang:apply(Module, behaviour_info, [Type]));
+                        io:format(IO, "  @callback ~s(~s) :: any\n", [CallbackName, any(CallbackArity)])
+                    end, erlang:apply(Module, behaviour_info, [callbacks]));
+    false ->
+      ok
+  end.
+
+write_optional_callbacks(IO, Module) ->
+  case erlang:function_exported(Module, behaviour_info, 1) of
+    true ->
+      case erlang:apply(Module, behaviour_info, [optional_callbacks]) of
+        [] -> 
+          ok;
+        OptionalCallbacks ->
+          io:format(IO, "  @optional_callbacks ~s\n", [to_ex(OptionalCallbacks)])
+      end;
     false ->
       ok
   end.
@@ -112,4 +125,14 @@ any(N) ->
 
 version(Version) ->
   re:replace(Version, "^[^0-9]*", "", [{return,list}]).
+
+to_ex(List) when is_list(List) ->
+  string:join([to_ex(E) || E <- List], ", ");
+to_ex({A, B}) ->
+  to_ex(A) ++ ": " ++ to_ex(B);
+to_ex(Atom) when is_atom(Atom) ->
+  ?FMT(":~s", [Atom]);
+to_ex(Num) when is_integer(Num);
+                is_float(Num) ->
+  ?FMT("~p", [Num]).
 
