@@ -83,7 +83,7 @@ write_callbacks(IO, Module, Type) ->
   case erlang:function_exported(Module, behaviour_info, 1) of
     true ->
       lists:foreach(fun({CallbackName, CallbackArity}) ->
-                        io:format(IO, "@~s ~s(~s) :: any\n", [Type, CallbackName, any(CallbackArity)])
+                        io:format(IO, "  @~s ~s(~s) :: any\n", [Type, CallbackName, any(CallbackArity)])
                     end, erlang:apply(Module, behaviour_info, [Type]));
     false ->
       ok
