@@ -73,7 +73,7 @@ generate_binding(ModuleName, Ebin, LibDir, ElixirVersion) ->
     true ->
       _ = write_optional_callbacks(IO, Module);
     false ->
-      ok
+      rebar_api:warn("Optional callbacks not supported with Elixir ~s", [ElixirVersion])
   end,
   _ = write_functions(IO, Module, ModuleName),
   io:format(IO, "end\n", []),
