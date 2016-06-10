@@ -129,9 +129,9 @@ version(Version) ->
 to_ex(List) when is_list(List) ->
   string:join([to_ex(E) || E <- List], ", ");
 to_ex({A, B}) ->
-  to_ex(A) ++ ": " ++ to_ex(B);
+  to_ex(A) ++ " " ++ to_ex(B);
 to_ex(Atom) when is_atom(Atom) ->
-  ?FMT(":~s", [Atom]);
+  ?FMT("~s:", [Atom]);
 to_ex(Num) when is_integer(Num);
                 is_float(Num) ->
   ?FMT("~p", [Num]).
