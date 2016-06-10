@@ -69,7 +69,7 @@ generate_binding(ModuleName, Ebin, LibDir, ElixirVersion) ->
   io:format(IO, "# MODIFY IT AT YOUR OWN RISK AND ONLY IF YOU KNOW WHAT YOU ARE DOING!\n", []),
   io:format(IO, "defmodule ~s do\n", [rebar3_elixir_utils:modularize(ModuleName)]),
   _ = write_callbacks(IO, Module),
-  case version(ElixirVersion) >= "1.3.0" of
+  case version(ElixirVersion) >= "1.3" of
     true ->
       _ = write_optional_callbacks(IO, Module);
     false ->
