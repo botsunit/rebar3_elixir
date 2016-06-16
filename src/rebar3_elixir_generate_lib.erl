@@ -68,12 +68,12 @@ generate_binding(ModuleName, Ebin, LibDir, ElixirVersion) ->
   io:format(IO, "# Using rebar3_elixir (https://github.com/botsunit/rebar3_elixir)\n", []),
   io:format(IO, "# MODIFY IT AT YOUR OWN RISK AND ONLY IF YOU KNOW WHAT YOU ARE DOING!\n", []),
   io:format(IO, "defmodule ~s do\n", [rebar3_elixir_utils:modularize(ModuleName)]),
-  _ = write_callbacks(IO, Module),
-  case version(ElixirVersion) >= "1.3" of
+  HasCallbacks = write_callbacks(IO, Module),
+  case version(ElixirVersion) >= "1.3" andalso HasCallbacks of
     true ->
-      _ = write_optional_callbacks(IO, Module);
+      write_optional_callbacks(IO, Module);
     false ->
-      rebar_api:warn("Optional callbacks not supported with Elixir ~s", [ElixirVersion])
+      false
   end,
   _ = write_functions(IO, Module, ModuleName),
   io:format(IO, "end\n", []),
@@ -84,9 +84,10 @@ write_callbacks(IO, Module) ->
     true ->
       lists:foreach(fun({CallbackName, CallbackArity}) ->
                         io:format(IO, "  @callback ~s(~s) :: any\n", [CallbackName, any(CallbackArity)])
-                    end, erlang:apply(Module, behaviour_info, [callbacks]));
+                    end, erlang:apply(Module, behaviour_info, [callbacks])),
+      true;
     false ->
-      ok
+      false
   end.
 
 write_optional_callbacks(IO, Module) ->
@@ -94,12 +95,13 @@ write_optional_callbacks(IO, Module) ->
     true ->
       case erlang:apply(Module, behaviour_info, [optional_callbacks]) of
         [] -> 
-          ok;
+          false;
         OptionalCallbacks ->
-          io:format(IO, "  @optional_callbacks ~s\n", [to_ex(OptionalCallbacks)])
+          io:format(IO, "  @optional_callbacks ~s\n", [to_ex(OptionalCallbacks)]),
+          true
       end;
     false ->
-      ok
+      false
   end.
 
 write_functions(IO, Module, ModuleName) ->
@@ -107,6 +109,7 @@ write_functions(IO, Module, ModuleName) ->
     MI when is_list(MI) ->
       lists:foreach(fun
                       ({module_info, _}) -> ok;
+                      ({behaviour_info, _}) -> ok;
                       ({N, A}) ->
                         Args = string:join(
                                  lists:map(fun(E) ->
