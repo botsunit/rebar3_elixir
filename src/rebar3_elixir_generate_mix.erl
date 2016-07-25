@@ -70,6 +70,8 @@ do(State) ->
                 _ ->
                   ""
               end,
+     PreCompileHooks = string:join(get_hooks(State, pre_hooks, compile), ","),
+     PostCompileHooks = string:join(get_hooks(State, post_hooks, compile), ","),
      rebar_api:info("Create ~s", [MixFile]),
      file:write_file(MixFile,
                      ?FMT(?MIX_EXS, [rebar3_elixir_utils:modularize(AppName),
@@ -79,9 +81,24 @@ do(State) ->
                                      to_ex(AppApplications),
                                      to_ex(AppEnv),
                                      AppMod,
-                                     FormatedDeps]))
+                                     FormatedDeps,
+                                     PreCompileHooks,
+                                     PostCompileHooks]))
    end || App <- Apps],
   {ok, State}.
+
+get_hooks(State, Type, Section) ->
+  lists:reverse(
+    lists:foldl(
+      fun
+        ({Regex, S, Command}, Acc) when S == Section ->
+          [?FMT("~n      {\"~s\", \"~s\"}", [Regex, Command])|Acc];
+        ({S, Command}, Acc) when S == Section ->
+          [?FMT("~n      \"~s\"", [Command])|Acc];
+        (_, Acc) ->
+          Acc
+      end, [], rebar_state:get(State, Type, []))).
+
 
 -spec format_error(any()) -> iolist().
 format_error(Reason) ->
