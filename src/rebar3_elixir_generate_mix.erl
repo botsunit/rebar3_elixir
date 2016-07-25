@@ -70,8 +70,8 @@ do(State) ->
                 _ ->
                   ""
               end,
-     PreCompileHooks = string:join(get_hooks(State, pre_hooks, compile), ","),
-     PostCompileHooks = string:join(get_hooks(State, post_hooks, compile), ","),
+     PreCompileHooks = string:join(get_hooks(App, pre_hooks, compile), ","),
+     PostCompileHooks = string:join(get_hooks(App, post_hooks, compile), ","),
      rebar_api:info("Create ~s", [MixFile]),
      file:write_file(MixFile,
                      ?FMT(?MIX_EXS, [rebar3_elixir_utils:modularize(AppName),
@@ -86,19 +86,6 @@ do(State) ->
                                      PostCompileHooks]))
    end || App <- Apps],
   {ok, State}.
-
-get_hooks(State, Type, Section) ->
-  lists:reverse(
-    lists:foldl(
-      fun
-        ({Regex, S, Command}, Acc) when S == Section ->
-          [?FMT("~n      {\"~s\", \"~s\"}", [Regex, Command])|Acc];
-        ({S, Command}, Acc) when S == Section ->
-          [?FMT("~n      \"~s\"", [Command])|Acc];
-        (_, Acc) ->
-          Acc
-      end, [], rebar_state:get(State, Type, []))).
-
 
 -spec format_error(any()) -> iolist().
 format_error(Reason) ->
@@ -128,6 +115,19 @@ get_deps([{Name, Reg, {git, URL}}|Deps], Acc, Only) when is_atom(Name), is_list(
 get_deps([{Name, Reg, {git, URL, {Type, RTB}}}|Deps], Acc, Only) when is_atom(Name), is_list(Reg), is_list(URL), is_atom(Type), is_list(RTB) ->
   get_deps(Deps, [?FMT("~n      {:~s, ~~r/~s/, git: \"~s\", ~s: \"~s\"~s}", [Name, Reg, URL, Type, RTB, Only])|Acc], Only).
 
+get_hooks(App, Type, Section) ->
+  Opts = rebar_app_info:opts(App),
+  Hooks = rebar_opts:get(Opts, Type, []),
+  lists:reverse(
+    lists:foldl(
+      fun
+        ({Regex, S, Command}, Acc) when S == Section ->
+          [?FMT("~n      {\"~s\", \"~s\"}", [Regex, Command])|Acc];
+        ({S, Command}, Acc) when S == Section ->
+          [?FMT("~n      \"~s\"", [Command])|Acc];
+        (_, Acc) ->
+          Acc
+      end, [], Hooks)).
   
 -ifdef(TEST).
 deps_test() ->
