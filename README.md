@@ -1,5 +1,9 @@
 # rebar3_elixir
 
+[![Hex.pm version](https://img.shields.io/hexpm/v/rebar3_elixir.svg?style=flat-square)](https://hex.pm/packages/rebar3_elixir)
+[![Hex.pm downloads](https://img.shields.io/hexpm/dt/rebar3_elixir.svg?style=flat-square)](https://hex.pm/packages/rebar3_elixir)
+[![License](https://img.shields.io/hexpm/l/rebar3_elixir.svg?style=flat-square)](https://hex.pm/packages/rebar3_elixir)
+
 A plugins for [rebar3](http://www.rebar3.org/) to generate a compatible [mix.exs](http://elixir-lang.org/docs/stable/mix/Mix.html) file and Elixir bindings.
 
 This plugin has two commands :
