@@ -105,15 +105,29 @@ end
 
 You specify the modules for which you want a binding, by using the `elixir_bindings` option :
 
-```makefile
+```erlang
 {elixir_bindings, [example, simple_example]}. 
 ```
 
 In this case, only `lib/Example.ex` and `lib/Other.Simple.Example.ex` will be generated.
 
+You can specify a list of function to include or exclude :
+
+```erlang
+{elixir_bindings, [{example, [{only, [fun1, {fun2,2}]}]}]}.
+```
+
+Here, only `fun1` (with any arity) and `fun2/2` will be availables in the binding `lib/Example.ex`.
+
+```erlang
+{elixir_bindings, [{example, [{except, [fun1, {fun2,2}]}]}]}.
+```
+
+Here, every function from the module `example`, except `fun1` (with any arity) and `fun2/2`, will be availables in the binding `lib/Example.ex`.
+
 You can also add a prefix by using `elixir_bindings_prefix` :
 
-```makefile
+```erlang
 {elixir_bindings_prefix, hello}.
 ```
 

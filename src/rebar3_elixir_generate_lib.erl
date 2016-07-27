@@ -43,7 +43,17 @@ do(State) ->
 format_error(Reason) ->
   io_lib:format("~p", [Reason]).
 
-generate_binding(ModuleName, Ebin, LibDir, ElixirVersion) ->
+generate_binding(ModuleName, Ebin, LibDir, ElixirVersion) when is_atom(ModuleName) ->
+  generate_binding({ModuleName, []}, Ebin, LibDir, ElixirVersion);
+generate_binding({ModuleName, Options}, Ebin, LibDir, ElixirVersion) ->
+  Except = case lists:keyfind(except, 1, Options) of
+             {except, E} when length(E) > 0 -> E;
+             _ -> undefined
+           end,
+  Only = case lists:keyfind(only, 1, Options) of
+           {only, O} when length(O) > 0 -> O;
+           _ -> undefined
+         end,
   LibFile = filename:join(LibDir, rebar3_elixir_utils:modularize(ModuleName) ++ ".ex"),
   Module = case code:load_abs(filename:join(Ebin, atom_to_list(ModuleName))) of
              {error, Reason0} -> 
@@ -75,7 +85,7 @@ generate_binding(ModuleName, Ebin, LibDir, ElixirVersion) ->
     false ->
       false
   end,
-  _ = write_functions(IO, Module, ModuleName),
+  _ = write_functions(IO, Module, ModuleName, Except, Only),
   io:format(IO, "end\n", []),
   file:close(IO).
 
@@ -104,24 +114,39 @@ write_optional_callbacks(IO, Module) ->
       false
   end.
 
-write_functions(IO, Module, ModuleName) ->
+write_functions(IO, Module, ModuleName, Except, Only) ->
   case erlang:apply(Module, module_info, [exports]) of
     MI when is_list(MI) ->
       lists:foreach(fun
                       ({module_info, _}) -> ok;
                       ({behaviour_info, _}) -> ok;
                       ({N, A}) ->
-                        Args = string:join(
-                                 lists:map(fun(E) ->
-                                               "arg" ++ integer_to_list(E)
-                                           end, lists:seq(1,A)), ", "),
-                        io:format(IO, "  def unquote(:~p)(~s) do\n", [atom_to_list(N), Args]),
-                        io:format(IO, "    :erlang.apply(:~p, :~p, [~s])\n", [atom_to_list(Module), atom_to_list(N), Args]),
-                        io:format(IO, "  end\n", [])
+                        case only(N, A, Only) andalso not except(N, A, Except) of
+                          true ->
+                            Args = string:join(
+                                     lists:map(fun(E) ->
+                                                   "arg" ++ integer_to_list(E)
+                                               end, lists:seq(1,A)), ", "),
+                            io:format(IO, "  def unquote(:~p)(~s) do\n", [atom_to_list(N), Args]),
+                            io:format(IO, "    :erlang.apply(:~p, :~p, [~s])\n", [atom_to_list(Module), atom_to_list(N), Args]),
+                            io:format(IO, "  end\n", []);
+                          false ->
+                            ok
+                        end
                     end, MI);
     _-> 
       rebar_api:abort("Can't retrieve module info for ~s", [ModuleName])
   end.
+
+only(_, _, undefined) ->
+  true;
+only(F, A, Only) ->
+  lists:member({F, A}, Only) orelse lists:member(F, Only).
+
+except(_, _, undefined) ->
+  false;
+except(F, A, Except) ->
+  lists:member({F, A}, Except) orelse lists:member(F, Except).
 
 any(N) ->
   string:join(lists:duplicate(N, "any"), ", ").
