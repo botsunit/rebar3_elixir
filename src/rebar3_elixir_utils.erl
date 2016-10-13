@@ -11,7 +11,7 @@ modularize(Name) when is_atom(Name) ->
 modularize(Name) when is_binary(Name) ->
   modularize(binary_to_list(Name));
 modularize(Name) when is_list(Name) ->
-	string:join(lists:map(fun([H|R]) -> [string:to_upper(H)|string:to_lower(R)] end, string:tokens(Name, "/_")), ".").
+	string:join(lists:map(fun([H|R]) -> [string:to_upper(H)|string:to_lower(R)] end, string:tokens(Name, "/_.")), ".").
 
 -ifdef(TEST).
 modularize_test() ->
