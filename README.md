@@ -135,6 +135,12 @@ You can also add a prefix by using `elixir_bindings_prefix` :
 {elixir_bindings_prefix, hello}.
 ```
 
+If you want to force the Elixir module name, you can use the `as` option :
+
+```erlang
+{elixir_bindings, [{example, [{as, "My.Module.Name"}]}]}.
+```
+
 So `rebar3_elixir` will generate `lib/Hello.Example.ex` and `lib/Hello.Other.Simple.Example.ex`
 
 ## Licence

@@ -34,7 +34,8 @@ do(State) ->
   [begin
      Ebin = filename:join(rebar_app_info:out_dir(App), "ebin"),
      LibDir = filename:join(rebar_app_info:dir(App), "lib"),
-     [generate_binding(Mod, Ebin, LibDir, ElixirVersion) ||
+     Prefix = rebar_state:get(State, elixir_bindings_prefix, ""),
+     [generate_binding(Mod, Ebin, LibDir, ElixirVersion, Prefix) ||
       Mod <- rebar_state:get(State, elixir_bindings, [])]
    end || App <- Apps],
   {ok, State}.
@@ -43,9 +44,9 @@ do(State) ->
 format_error(Reason) ->
   io_lib:format("~p", [Reason]).
 
-generate_binding(ModuleName, Ebin, LibDir, ElixirVersion) when is_atom(ModuleName) ->
-  generate_binding({ModuleName, []}, Ebin, LibDir, ElixirVersion);
-generate_binding({ModuleName, Options}, Ebin, LibDir, ElixirVersion) ->
+generate_binding(ModuleName, Ebin, LibDir, ElixirVersion, Prefix) when is_atom(ModuleName) ->
+  generate_binding({ModuleName, []}, Ebin, LibDir, ElixirVersion, Prefix);
+generate_binding({ModuleName, Options}, Ebin, LibDir, ElixirVersion, Prefix) ->
   Except = case lists:keyfind(except, 1, Options) of
              {except, E} when length(E) > 0 -> E;
              _ -> undefined
@@ -54,7 +55,13 @@ generate_binding({ModuleName, Options}, Ebin, LibDir, ElixirVersion) ->
            {only, O} when length(O) > 0 -> O;
            _ -> undefined
          end,
-  LibFile = filename:join(LibDir, rebar3_elixir_utils:modularize(ModuleName) ++ ".ex"),
+  ExModuleName = case lists:keyfind(as, 1, Options) of
+                   {as, N} ->
+                     rebar3_elixir_utils:modularize(Prefix, N);
+                   _ ->
+                     rebar3_elixir_utils:modularize(Prefix, ModuleName)
+                 end,
+  LibFile = filename:join(LibDir, ExModuleName ++ ".ex"),
   Module = case code:load_abs(filename:join(Ebin, atom_to_list(ModuleName))) of
              {error, Reason0} -> 
                rebar_api:abort("Can't load module ~s: ~p", [ModuleName, Reason0]);
@@ -73,11 +80,11 @@ generate_binding({ModuleName, Options}, Ebin, LibDir, ElixirVersion) ->
          {error, Reason2} ->
            rebar_api:abort("Can't create ~s: ~p", [LibDir, Reason2])
        end,
-  io:format(IO, "# File: ~s.ex\n", [rebar3_elixir_utils:modularize(ModuleName)]),
+  io:format(IO, "# File: ~s.ex\n", [ExModuleName]),
   io:format(IO, "# This file was generated from ~s.beam\n", [ModuleName]),
   io:format(IO, "# Using rebar3_elixir (https://github.com/botsunit/rebar3_elixir)\n", []),
   io:format(IO, "# MODIFY IT AT YOUR OWN RISK AND ONLY IF YOU KNOW WHAT YOU ARE DOING!\n", []),
-  io:format(IO, "defmodule ~s do\n", [rebar3_elixir_utils:modularize(ModuleName)]),
+  io:format(IO, "defmodule ~s do\n", [ExModuleName]),
   HasCallbacks = write_callbacks(IO, Module),
   case version(ElixirVersion) >= "1.3" andalso HasCallbacks of
     true ->
