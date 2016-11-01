@@ -23,7 +23,7 @@ modularize(Name) when is_atom(Name) ->
 modularize(Name) when is_binary(Name) ->
   modularize(binary_to_list(Name));
 modularize(Name) when is_list(Name) ->
-	string:join(lists:map(fun([H|R]) -> [string:to_upper(H)|string:to_lower(R)] end, string:tokens(Name, "/_.")), ".").
+	string:join(lists:map(fun([H|R]) -> [string:to_upper(H)|R] end, string:tokens(Name, "/_.")), ".").
 
 to_list(V) when is_atom(V) ->
   atom_to_list(V);
@@ -53,6 +53,8 @@ modularize_test() ->
   ?assertEqual("One.Two", modularize("one", <<"two">>)),
   ?assertEqual("One.Two", modularize(<<"one">>, "two")),
   ?assertEqual("Two", modularize("", "two")),
-  ?assertEqual("Two", modularize('', "two")).
+  ?assertEqual("Two", modularize('', "two")),
+  ?assertEqual("ISModule", modularize("ISModule")),
+  ?assertEqual("IS.A.MODULE", modularize("iS.a.MODULE")).
 -endif.
 
