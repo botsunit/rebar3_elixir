@@ -57,8 +57,10 @@ generate_binding({ModuleName, Options}, Ebin, LibDir, ElixirVersion, Prefix) ->
          end,
   ExModuleName = case lists:keyfind(as, 1, Options) of
                    {as, N} ->
+                     rebar_api:debug("IS ~p AS ~p with prefix ~p", [ModuleName, N, Prefix]),
                      rebar3_elixir_utils:modularize(Prefix, N);
                    _ ->
+                     rebar_api:debug("IS ~p with prefix ~p", [ModuleName, Prefix]),
                      rebar3_elixir_utils:modularize(Prefix, ModuleName)
                  end,
   LibFile = filename:join(LibDir, ExModuleName ++ ".ex"),
