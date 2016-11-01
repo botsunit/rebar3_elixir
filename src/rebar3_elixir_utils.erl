@@ -4,18 +4,13 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--export([modularize/2
-        , to_list/1]).
+-export([
+         modularize/2
+         , modularize/1
+         , to_list/1
+        ]).
 
-modularize(Prefix, Name) when is_atom(Name) ->
-  modularize(Prefix, atom_to_list(Name));
-modularize(Prefix, Name) when is_binary(Name) ->
-  modularize(Prefix, binary_to_list(Name));
-modularize(Prefix, Name) when is_atom(Prefix) ->
-  modularize(atom_to_list(Prefix), Name);
-modularize(Prefix, Name) when is_binary(Prefix) ->
-  modularize(binary_to_list(Prefix), Name);
-modularize(Prefix, Name) when is_list(Prefix), is_list(Name) ->
+modularize(Prefix, Name) ->
   case modularize(Prefix) of
     "" ->
       modularize(Name);
@@ -23,7 +18,11 @@ modularize(Prefix, Name) when is_list(Prefix), is_list(Name) ->
       Prefix1 ++ "." ++ modularize(Name)
   end.
 
-modularize(Name) ->
+modularize(Name) when is_atom(Name) ->
+  modularize(atom_to_list(Name));
+modularize(Name) when is_binary(Name) ->
+  modularize(binary_to_list(Name));
+modularize(Name) when is_list(Name) ->
 	string:join(lists:map(fun([H|R]) -> [string:to_upper(H)|string:to_lower(R)] end, string:tokens(Name, "/_.")), ".").
 
 to_list(V) when is_atom(V) ->
@@ -36,9 +35,13 @@ to_list(V) when is_binary(V); is_bitstring(V) ->
 -ifdef(TEST).
 modularize_test() ->
   ?assertEqual("One", modularize("one")),
+  ?assertEqual("One", modularize(one)),
+  ?assertEqual("One", modularize(<<"one">>)),
   ?assertEqual("One.Two", modularize("One.Two")),
   ?assertEqual("One.Two", modularize("one.two")),
   ?assertEqual("One.Two", modularize("one_Two")),
+  ?assertEqual("One.Two", modularize(one_Two)),
+  ?assertEqual("One.Two", modularize(<<"one/Two">>)),
   ?assertEqual("One.Two.Three", modularize("one_two_three")),
   ?assertEqual("One.Two", modularize(one, two)),
   ?assertEqual("One.Two", modularize("one", two)),
