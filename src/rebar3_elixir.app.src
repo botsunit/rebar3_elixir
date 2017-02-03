@@ -1,12 +1,12 @@
 {application, rebar3_elixir,
  [{description, "A rebar plugin to generate mix.exs and Elixir bindings"}
-  ,{vsn, "0.1.1"}
-  ,{registered, []}
-  ,{applications, [kernel, stdlib]}
-  ,{env,[]}
-  ,{modules, []}
+  , {vsn, "0.1.2"}
+  , {registered, []}
+  , {applications, [kernel, stdlib]}
+  , {env,[]}
+  , {modules, []}
 
-  ,{maintainers, ["Gregoire Lejeune"]}
-  ,{licenses, ["BSD-3"]}
-  ,{links, [{"Github", "https://github.com/botsunit/rebar3_elixir"}]}
+  , {maintainers, ["Gregoire Lejeune"]}
+  , {licenses, ["BSD-3"]}
+  , {links, [{"Github", "https://github.com/botsunit/rebar3_elixir"}]}
  ]}.
